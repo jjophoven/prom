@@ -143,26 +143,41 @@ const seating = {
     "Table 16": ["Cain L.","Brennen B.","Elijah A.","Iris B.","Timmy F."]
 };
 
+function normalize(str) {
+    return str
+        .toLowerCase()
+        .replace(/[^a-z\s]/g, "")   // remove punctuation (like periods)
+        .trim()
+        .split(/\s+/);             // split into words
+}
+
 function scoreMatch(input, name) {
-    input = input.toLowerCase();
-    name = name.toLowerCase();
+    const inputParts = normalize(input);
+    const nameParts = normalize(name);
 
     let score = 0;
 
-    if (name.includes(input)) score += 2;
-
-    const parts = name.split(" ");
-    for (let part of parts) {
-        if (part.startsWith(input)) score += 3;
-        else if (part.includes(input)) score += 2;
+    // exact full match boost
+    if (inputParts.join(" ") === nameParts.join(" ")) {
+        return 100;
     }
 
-    let overlap = 0;
-    for (let char of input) {
-        if (name.includes(char)) overlap++;
+    for (let ip of inputParts) {
+        for (let np of nameParts) {
+            // exact match
+            if (ip === np) score += 5;
+
+            // prefix match (jo -> john)
+            else if (np.startsWith(ip)) score += 3;
+
+            // substring match
+            else if (np.includes(ip)) score += 2;
+
+            // initials match (j matches john)
+            else if (ip.length === 1 && np[0] === ip) score += 1;
+        }
     }
 
-    score += overlap / input.length;
     return score;
 }
 
@@ -186,7 +201,7 @@ function findTable() {
 
     const resultDiv = document.getElementById("result");
 
-    if (bestScore > 2) {
+    if (bestScore >= 2) {
         resultDiv.innerHTML = `
             <div class="card">
                 ${bestMatch.name}<br>
