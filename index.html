@@ -145,7 +145,7 @@ const seating = {
     "Table 3": ["Raynah B.","Sophia H.","Colton J.","Lucy F.","Malena B.","Abby H.","Megan S.","Ady H."],
     "Table 4": ["Aaron C.","Clayton M.","Aidan D.","Mason K.","Charlie G.","Jojo C.","Alex P.","Beckett S."],
     "Table 5": ["Derek M.","Andre Y.","Cade F.","Dane P.","Chris L.","Quinton B.","Deandre M.","Stetson B."],
-    "Table 6": ["Ari B.","Grayson P.","Brendan M.","Jacob R.","Luke E.","Jacob O.","Josiah M.","Graham P."],
+    "Table 6": ["Ari B.","Grayson P.","Brenden M.","Jacob R.","Luke E.","Jacob O.","Josiah M.","Graham P."],
     "Table 7": ["Henry G.","Gage J.","Adelle G.","Will S.","Jesse H.","Camden B.","Evan G.","Haven H."],
     "Table 8": ["Joshua P.","Colin B.","Cash L.","Magnus J.","Tanner R.","Parker S.","Graham F."],
     "Table 9": ["Faith B.","Jayden G.","Montana J.","Liam K.","Lissa J.","Ashley S.","Brooke S.","Adam S."],
@@ -157,6 +157,32 @@ const seating = {
     "Table 15": ["Grace L.","Avery B.","Amelia H.","Serena M.","Amelia M.","Sara M.","Reisa H."],
     "Table 16": ["Cain L.","Brennen B.","Elijah A.","Iris B.","Timmy F.","Jonathan V."]
 };
+
+function editDistance(a, b) {
+    a = a.toLowerCase();
+    b = b.toLowerCase();
+
+    const dp = Array(a.length + 1).fill(null).map(() =>
+        Array(b.length + 1).fill(0)
+    );
+
+    for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+    for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+
+            dp[i][j] = Math.min(
+                dp[i - 1][j] + 1,     // delete
+                dp[i][j - 1] + 1,     // insert
+                dp[i - 1][j - 1] + cost // replace
+            );
+        }
+    }
+
+    return dp[a.length][b.length];
+}
 
 function extractNameParts(str) {
     const cleaned = str
@@ -170,32 +196,31 @@ function extractNameParts(str) {
         initial: cleaned[1] ? cleaned[1][0] : ""
     };
 }
-
 function scoreMatch(input, name) {
     const inputParts = extractNameParts(input);
     const nameParts = extractNameParts(name);
 
     let score = 0;
 
-    // Strong: exact first name match
-    if (inputParts.first === nameParts.first) score += 5;
+    // Exact first name
+    if (inputParts.first === nameParts.first) {
+        score += 6;
+    } else {
+        // Fuzzy match (allow 1–2 letter mistakes)
+        const dist = editDistance(inputParts.first, nameParts.first);
 
-    // Partial first name match (jo -> john)
-    else if (nameParts.first.startsWith(inputParts.first)) score += 3;
+        if (dist === 1) score += 5;
+        else if (dist === 2) score += 3;
+    }
+
+    // Prefix match
+    if (nameParts.first.startsWith(inputParts.first)) {
+        score += 2;
+    }
 
     // Initial match
     if (inputParts.initial && inputParts.initial === nameParts.initial) {
         score += 4;
-    }
-
-    // Handle cases like "jo" meaning J + O
-    if (inputParts.first.length === 2 && !inputParts.initial) {
-        if (
-            inputParts.first[0] === nameParts.first[0] &&
-            inputParts.first[1] === nameParts.initial
-        ) {
-            score += 4;
-        }
     }
 
     return score;
@@ -221,7 +246,7 @@ function findTable() {
 
     const resultDiv = document.getElementById("result");
 
-    if (bestScore >= 2) {
+    if (bestScore >= 3) {
         // Get everyone at the same table except the matched person
         const tableMates = seating[bestMatch.table]
             .filter(n => n !== bestMatch.name)
