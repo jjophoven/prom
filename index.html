@@ -180,7 +180,6 @@ function scoreMatch(input, name) {
 
     return score;
 }
-
 function findTable() {
     const input = document.getElementById("nameInput").value.trim().toLowerCase();
     if (!input) return;
@@ -202,10 +201,28 @@ function findTable() {
     const resultDiv = document.getElementById("result");
 
     if (bestScore >= 2) {
+        // Get everyone at the same table except the matched person
+        const tableMates = seating[bestMatch.table]
+            .filter(n => n !== bestMatch.name)
+            .map(n => `<div>${n}</div>`)
+            .join("");
+
         resultDiv.innerHTML = `
             <div class="card">
-                ${bestMatch.name}<br>
-                <span style="font-size:1.1em;">${bestMatch.table}</span>
+                <div style="font-size:1.5em; margin-bottom:5px;">
+                    ${bestMatch.name}
+                </div>
+                <div style="font-size:1.1em; margin-bottom:15px;">
+                    ${bestMatch.table}
+                </div>
+
+                <div style="font-size:0.9em; opacity:0.8; margin-bottom:5px;">
+                    You're sitting with:
+                </div>
+
+                <div style="font-size:1.1em;">
+                    ${tableMates}
+                </div>
             </div>
         `;
     } else {
