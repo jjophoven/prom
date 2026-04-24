@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Golden Hour Prom Seating</title>
+<style>
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(to bottom, #f5d7a1, #c89b5a);
+        color: #4b3a1a;
+        text-align: center;
+        padding: 40px;
+    }
+
+    h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+    }
+
+    input {
+        padding: 12px;
+        width: 300px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        outline: none;
+    }
+
+    button {
+        padding: 12px 20px;
+        margin-left: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        background: #b8892d;
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #9e7424;
+    }
+
+    #result {
+        margin-top: 30px;
+        font-size: 1.8em;
+        font-weight: bold;
+    }
+
+    .card {
+        margin-top: 20px;
+        display: inline-block;
+        padding: 25px;
+        border-radius: 15px;
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+</style>
+</head>
+<body>
+
+<h1>Golden Hour Prom Seating</h1>
+<p>Type your name to find your table</p>
+
+<input id="nameInput" placeholder="Enter your name...">
+<button onclick="findTable()">Find Table</button>
+
+<div id="result"></div>
+
+<script>
+const seating = {
+    "Table 1": ["Audrey O.","Ella F.","Adelaide H.","Jessica W.","Ashley A.","Dania Z.","Dakota L."],
+    "Table 2": ["Grace T.","Madison S.","Zach V.","Liv S.","Evelyn S.","Nathan V.","Isaac Z.","Madison T."],
+    "Table 3": ["Raynah B.","Sophia H.","Colton J.","Lucy F.","Malena B.","Abby H.","Megan S.","Ady H."],
+    "Table 4": ["Aaron C.","Clayton M.","Aidan D.","Mason K.","Charlie G.","Jojo C.","Alex P.","Beckett S."],
+    "Table 5": ["Derek M.","Andre Y.","Cade F.","Dane P.","Chris L.","Quinton B.","Deandre M.","Stetson B."],
+    "Table 6": ["Ari B.","Grayson P.","Brendan M.","Jacob R.","Luke E.","Jacob O.","Josiah M.","Graham P."],
+    "Table 7": ["Henry G.","Gage J.","Adelle G.","Will S.","Jesse H.","Camden B.","Evan G.","Haven H."],
+    "Table 8": ["Joshua P.","Jonathan V.","Colin B.","Cash L.","Magnus J.","Tanner R.","Parker S.","Graham F."],
+    "Table 9": ["Faith B.","Jayden G.","Montana J.","Liam K.","Lissa J.","Ashley S.","Brooke S.","Adam S."],
+    "Table 10": ["Leah W.","Claire F.","Lacey D.","Elianna C.","Hayley F.","Kyra K.","Alyssa R.","Brandon L."],
+    "Table 11": ["Hope A.","Allegra D.","Ben D.","Anaya E.","Bhagwat S.","Leighla C.","Riley M.","Anthony Z."],
+    "Table 12": ["Megan G.","Wren F.","Jett B.","Keilan K.","Brody S.","Tyler O.","Jonah Z.","Samuel S."],
+    "Table 13": ["Jacob E.","Claire M.","Kip C.","Owen M.","Angela N.","Malachi C.","Novia A.","Andy M."],
+    "Table 14": ["Lauren D.","Bella D.","Grace T.","Ella B.","Georgia F.","Layla K.","Aria B."],
+    "Table 15": ["Grace L.","Avery B.","Amelia H.","Serena M.","Amelia M.","Sara M.","Reisa H."],
+    "Table 16": ["Cain L.","Brennen B.","Elijah A.","Iris B.","Timmy F."]
+};
+
+// Better fuzzy scoring
+function scoreMatch(input, name) {
+    input = input.toLowerCase();
+    name = name.toLowerCase();
+
+    const parts = name.split(" ");
+
+    let score = 0;
+
+    // Strong match: exact substring anywhere
+    if (name.includes(input)) score += 2;
+
+    // Check each part (first/last name)
+    for (let part of parts) {
+        if (part.startsWith(input)) score += 3; // BEST case
+        else if (part.includes(input)) score += 2;
+    }
+
+    // Bonus: partial character overlap (typo tolerance)
+    let overlap = 0;
+    for (let char of input) {
+        if (name.includes(char)) overlap++;
+    }
+    score += overlap / input.length;
+
+    return score;
+}
+
+function findTable() {
+    const input = document.getElementById("nameInput").value.trim().toLowerCase();
+    if (!input) return;
+
+    let bestMatch = null;
+    let bestScore = 0;
+
+    for (const table in seating) {
+        for (const name of seating[table]) {
+            let score = scoreMatch(input, name);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestMatch = { name, table };
+            }
+        }
+    }
+
+    const resultDiv = document.getElementById("result");
+
+    if (bestScore > 2) {
+        resultDiv.innerHTML = `
+            <div class="card">
+                ${bestMatch.name}<br>
+                <span style="font-size:1.2em;">${bestMatch.table}</span>
+            </div>
+        `;
+    } else {
+        resultDiv.innerHTML = "Name not found 😕";
+    }
+}
+</script>
+
+</body>
+</html>
