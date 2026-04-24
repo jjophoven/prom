@@ -142,44 +142,49 @@ const seating = {
     "Table 15": ["Grace L.","Avery B.","Amelia H.","Serena M.","Amelia M.","Sara M.","Reisa H."],
     "Table 16": ["Cain L.","Brennen B.","Elijah A.","Iris B.","Timmy F."]
 };
-
-function normalize(str) {
-    return str
+function extractNameParts(str) {
+    const cleaned = str
         .toLowerCase()
-        .replace(/[^a-z\s]/g, "")   // remove punctuation (like periods)
+        .replace(/[^a-z\s]/g, "")
         .trim()
-        .split(/\s+/);             // split into words
+        .split(/\s+/);
+
+    return {
+        first: cleaned[0] || "",
+        initial: cleaned[1] ? cleaned[1][0] : ""
+    };
 }
 
 function scoreMatch(input, name) {
-    const inputParts = normalize(input);
-    const nameParts = normalize(name);
+    const inputParts = extractNameParts(input);
+    const nameParts = extractNameParts(name);
 
     let score = 0;
 
-    // exact full match boost
-    if (inputParts.join(" ") === nameParts.join(" ")) {
-        return 100;
+    // Strong: exact first name match
+    if (inputParts.first === nameParts.first) score += 5;
+
+    // Partial first name match (jo -> john)
+    else if (nameParts.first.startsWith(inputParts.first)) score += 3;
+
+    // Initial match
+    if (inputParts.initial && inputParts.initial === nameParts.initial) {
+        score += 4;
     }
 
-    for (let ip of inputParts) {
-        for (let np of nameParts) {
-            // exact match
-            if (ip === np) score += 5;
-
-            // prefix match (jo -> john)
-            else if (np.startsWith(ip)) score += 3;
-
-            // substring match
-            else if (np.includes(ip)) score += 2;
-
-            // initials match (j matches john)
-            else if (ip.length === 1 && np[0] === ip) score += 1;
+    // Handle cases like "jo" meaning J + O
+    if (inputParts.first.length === 2 && !inputParts.initial) {
+        if (
+            inputParts.first[0] === nameParts.first[0] &&
+            inputParts.first[1] === nameParts.initial
+        ) {
+            score += 4;
         }
     }
 
     return score;
 }
+
 function findTable() {
     const input = document.getElementById("nameInput").value.trim().toLowerCase();
     if (!input) return;
