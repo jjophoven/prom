@@ -88,7 +88,6 @@ const seating = {
     "Table 16": ["Cain L.","Brennen B.","Elijah A.","Iris B.","Timmy F."]
 };
 
-// Better fuzzy scoring
 function scoreMatch(input, name) {
     input = input.toLowerCase();
     name = name.toLowerCase();
@@ -100,13 +99,11 @@ function scoreMatch(input, name) {
     // Strong match: exact substring anywhere
     if (name.includes(input)) score += 2;
 
-    // Check each part (first/last name)
     for (let part of parts) {
-        if (part.startsWith(input)) score += 3; // BEST case
+        if (part.startsWith(input)) score += 3;
         else if (part.includes(input)) score += 2;
     }
 
-    // Bonus: partial character overlap (typo tolerance)
     let overlap = 0;
     for (let char of input) {
         if (name.includes(char)) overlap++;
