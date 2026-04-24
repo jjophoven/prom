@@ -2,39 +2,69 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Golden Hour Prom Seating</title>
+
 <style>
+    * {
+        box-sizing: border-box;
+    }
+
     body {
+        margin: 0;
         font-family: 'Segoe UI', sans-serif;
         background: linear-gradient(to bottom, #f5d7a1, #c89b5a);
         color: #4b3a1a;
         text-align: center;
-        padding: 40px;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .container {
+        width: 100%;
+        max-width: 500px;
     }
 
     h1 {
-        font-size: 2.5em;
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
         margin-bottom: 10px;
     }
 
+    p {
+        margin-bottom: 20px;
+        font-size: 1rem;
+    }
+
+    .input-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
     input {
-        padding: 12px;
-        width: 300px;
+        flex: 1;
+        min-width: 200px;
+        padding: 14px;
         font-size: 16px;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         outline: none;
     }
 
     button {
-        padding: 12px 20px;
-        margin-left: 10px;
+        padding: 14px 18px;
         font-size: 16px;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         background: #b8892d;
         color: white;
         cursor: pointer;
+        transition: 0.2s;
+        white-space: nowrap;
     }
 
     button:hover {
@@ -42,31 +72,56 @@
     }
 
     #result {
-        margin-top: 30px;
-        font-size: 1.8em;
+        margin-top: 25px;
+        font-size: 1.4rem;
         font-weight: bold;
     }
 
     .card {
-        margin-top: 20px;
-        display: inline-block;
-        padding: 25px;
-        border-radius: 15px;
-        background: rgba(255,255,255,0.2);
+        margin-top: 15px;
+        padding: 22px;
+        border-radius: 16px;
+        background: rgba(255,255,255,0.25);
         backdrop-filter: blur(10px);
         box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        display: inline-block;
+        min-width: 200px;
+    }
+
+    /* MOBILE TWEAKS */
+    @media (max-width: 480px) {
+        body {
+            padding: 15px;
+        }
+
+        .input-row {
+            flex-direction: column;
+        }
+
+        input, button {
+            width: 100%;
+        }
+
+        button {
+            margin-left: 0;
+        }
     }
 </style>
 </head>
+
 <body>
 
-<h1>Golden Hour Prom Seating</h1>
-<p>Type your name to find your table</p>
+<div class="container">
+    <h1>Golden Hour Prom Seating</h1>
+    <p>Type your name to find your table</p>
 
-<input id="nameInput" placeholder="Enter your name...">
-<button onclick="findTable()">Find Table</button>
+    <div class="input-row">
+        <input id="nameInput" placeholder="Enter your name...">
+        <button onclick="findTable()">Find Table</button>
+    </div>
 
-<div id="result"></div>
+    <div id="result"></div>
+</div>
 
 <script>
 const seating = {
@@ -92,13 +147,11 @@ function scoreMatch(input, name) {
     input = input.toLowerCase();
     name = name.toLowerCase();
 
-    const parts = name.split(" ");
-
     let score = 0;
 
-    // Strong match: exact substring anywhere
     if (name.includes(input)) score += 2;
 
+    const parts = name.split(" ");
     for (let part of parts) {
         if (part.startsWith(input)) score += 3;
         else if (part.includes(input)) score += 2;
@@ -108,8 +161,8 @@ function scoreMatch(input, name) {
     for (let char of input) {
         if (name.includes(char)) overlap++;
     }
-    score += overlap / input.length;
 
+    score += overlap / input.length;
     return score;
 }
 
@@ -137,7 +190,7 @@ function findTable() {
         resultDiv.innerHTML = `
             <div class="card">
                 ${bestMatch.name}<br>
-                <span style="font-size:1.2em;">${bestMatch.table}</span>
+                <span style="font-size:1.1em;">${bestMatch.table}</span>
             </div>
         `;
     } else {
